@@ -1,0 +1,130 @@
+ENTITY-RELATIONSHIP DIAGRAM (ERD) DESCRIPTION
+==============================================
+
+Database: BankingSystemDB
+
+ENTITIES:
+---------
+
+1. Users
+   - Primary Key: UserId (INT, Identity)
+   - Attributes:
+     * Username (NVARCHAR(50), Unique, Not Null)
+     * Email (NVARCHAR(100), Unique, Not Null)
+     * PasswordHash (NVARCHAR(256), Not Null)
+     * FirstName (NVARCHAR(50), Not Null)
+     * LastName (NVARCHAR(50), Not Null)
+     * PhoneNumber (NVARCHAR(20), Nullable)
+     * Address (NVARCHAR(200), Nullable)
+     * DateOfBirth (DATE, Nullable)
+     * Role (NVARCHAR(20), Not Null, Default: 'Customer')
+     * IsActive (BIT, Not Null, Default: 1)
+     * CreatedDate (DATETIME, Not Null, Default: GETDATE())
+     * LastModifiedDate (DATETIME, Not Null, Default: GETDATE())
+
+2. AccountTypes
+   - Primary Key: AccountTypeId (INT, Identity)
+   - Attributes:
+     * TypeName (NVARCHAR(50), Unique, Not Null) - e.g., 'Savings', 'Checking', 'Credit'
+     * Description (NVARCHAR(200), Nullable)
+     * InterestRate (DECIMAL(5,2), Default: 0.00)
+     * MinimumBalance (DECIMAL(18,2), Default: 0.00)
+
+3. Accounts
+   - Primary Key: AccountId (INT, Identity)
+   - Foreign Keys:
+     * UserId -> Users(UserId) [Cascade Delete]
+     * AccountTypeId -> AccountTypes(AccountTypeId)
+   - Attributes:
+     * AccountNumber (NVARCHAR(20), Unique, Not Null)
+     * Balance (DECIMAL(18,2), Not Null, Default: 0.00)
+     * IsActive (BIT, Not Null, Default: 1)
+     * CreatedDate (DATETIME, Not Null, Default: GETDATE())
+     * LastModifiedDate (DATETIME, Not Null, Default: GETDATE())
+
+4. TransactionTypes
+   - Primary Key: TransactionTypeId (INT, Identity)
+   - Attributes:
+     * TypeName (NVARCHAR(50), Unique, Not Null) - e.g., 'Deposit', 'Withdrawal', 'Transfer', 'Loan Payment'
+
+5. Transactions
+   - Primary Key: TransactionId (INT, Identity)
+   - Foreign Keys:
+     * AccountId -> Accounts(AccountId) [Cascade Delete]
+     * TransactionTypeId -> TransactionTypes(TransactionTypeId)
+     * RelatedAccountId -> Accounts(AccountId) [Nullable, for transfers]
+   - Attributes:
+     * Amount (DECIMAL(18,2), Not Null)
+     * BalanceAfterTransaction (DECIMAL(18,2), Not Null)
+     * Description (NVARCHAR(200), Nullable)
+     * TransactionDate (DATETIME, Not Null, Default: GETDATE())
+
+6. Loans (Optional Enhancement)
+   - Primary Key: LoanId (INT, Identity)
+   - Foreign Keys:
+     * UserId -> Users(UserId) [Cascade Delete]
+     * AccountId -> Accounts(AccountId) [Nullable]
+   - Attributes:
+     * LoanAmount (DECIMAL(18,2), Not Null)
+     * InterestRate (DECIMAL(5,2), Not Null)
+     * MonthlyPayment (DECIMAL(18,2), Not Null)
+     * RemainingBalance (DECIMAL(18,2), Not Null)
+     * LoanStatus (NVARCHAR(20), Not Null, Default: 'Pending')
+     * ApplicationDate (DATETIME, Not Null, Default: GETDATE())
+     * ApprovalDate (DATETIME, Nullable)
+     * DueDate (DATE, Nullable)
+
+RELATIONSHIPS:
+--------------
+
+1. Users (1) ----< (Many) Accounts
+   - One user can have multiple accounts
+   - Relationship: One-to-Many
+   - Cascade Delete: When a user is deleted, all their accounts are deleted
+
+2. AccountTypes (1) ----< (Many) Accounts
+   - One account type can be associated with many accounts
+   - Relationship: One-to-Many
+
+3. Accounts (1) ----< (Many) Transactions
+   - One account can have many transactions
+   - Relationship: One-to-Many
+   - Cascade Delete: When an account is deleted, all its transactions are deleted
+
+4. TransactionTypes (1) ----< (Many) Transactions
+   - One transaction type can be associated with many transactions
+   - Relationship: One-to-Many
+
+5. Transactions (Many) ----< (1) Accounts [RelatedAccountId]
+   - For transfer transactions, a transaction can reference a related account
+   - Relationship: Many-to-One (Self-referencing)
+
+6. Users (1) ----< (Many) Loans
+   - One user can have multiple loans
+   - Relationship: One-to-Many
+   - Cascade Delete: When a user is deleted, all their loans are deleted
+
+7. Accounts (1) ----< (Many) Loans
+   - One account can be linked to multiple loans (for loan payments)
+   - Relationship: One-to-Many
+
+INDEXES:
+--------
+
+- IX_Users_Username on Users(Username)
+- IX_Users_Email on Users(Email)
+- IX_Accounts_UserId on Accounts(UserId)
+- IX_Accounts_AccountNumber on Accounts(AccountNumber)
+- IX_Transactions_AccountId on Transactions(AccountId)
+- IX_Transactions_TransactionDate on Transactions(TransactionDate)
+- IX_Loans_UserId on Loans(UserId)
+
+STORED PROCEDURES:
+------------------
+
+1. sp_CreateUser - Creates a new user account
+2. sp_GetUserByUsername - Retrieves user by username
+3. sp_CreateAccount - Creates a new account with optional initial deposit
+4. sp_ProcessTransaction - Processes deposits, withdrawals, and transfers with balance updates
+5. sp_GetTransactionHistory - Retrieves transaction history with optional date and type filters
+

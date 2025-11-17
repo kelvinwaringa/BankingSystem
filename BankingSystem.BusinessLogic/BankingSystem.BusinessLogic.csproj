@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>BankingSystem.BusinessLogic</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BankingSystem.Models\BankingSystem.Models.csproj" />
+    <ProjectReference Include="..\BankingSystem.DataAccess\BankingSystem.DataAccess.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+
+</Project>
+

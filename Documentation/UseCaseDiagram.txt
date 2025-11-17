@@ -1,0 +1,149 @@
+USE CASE DIAGRAM - BANKING SYSTEM
+==================================
+
+ACTORS:
+-------
+
+1. Customer
+   - Primary user of the banking system
+   - Can perform banking operations on their own accounts
+
+2. Administrator
+   - Bank staff member
+   - Has elevated privileges for system management
+   - Can view all accounts and transactions
+
+USE CASES:
+----------
+
+A. AUTHENTICATION & AUTHORIZATION
+   UC-1: Sign Up
+      - Actor: Customer
+      - Description: New customer creates an account with username, email, password, and personal information
+      - Preconditions: Customer does not have an account
+      - Postconditions: New user account created, customer can login
+
+   UC-2: Login
+      - Actor: Customer, Administrator
+      - Description: User authenticates with username and password
+      - Preconditions: User account exists and is active
+      - Postconditions: User is logged in and redirected to dashboard
+
+   UC-3: Logout
+      - Actor: Customer, Administrator
+      - Description: User logs out of the system
+      - Preconditions: User is logged in
+      - Postconditions: User session ended, redirected to login
+
+B. ACCOUNT MANAGEMENT
+   UC-4: Create Account
+      - Actor: Customer
+      - Description: Customer creates a new bank account (Savings, Checking, or Credit)
+      - Preconditions: Customer is logged in
+      - Postconditions: New account created with account number
+
+   UC-5: View Accounts
+      - Actor: Customer
+      - Description: Customer views list of all their accounts with balances
+      - Preconditions: Customer is logged in
+      - Postconditions: Account list displayed
+
+   UC-6: View Account Balance
+      - Actor: Customer
+      - Description: Customer views current balance of a specific account
+      - Preconditions: Customer is logged in, account exists
+      - Postconditions: Account balance displayed
+
+   UC-7: Update Profile
+      - Actor: Customer
+      - Description: Customer updates personal information (name, phone, address)
+      - Preconditions: Customer is logged in
+      - Postconditions: Profile information updated
+
+C. TRANSACTION OPERATIONS
+   UC-8: Deposit Funds
+      - Actor: Customer
+      - Description: Customer deposits money into an account
+      - Preconditions: Customer is logged in, account exists
+      - Postconditions: Account balance increased, transaction recorded
+
+   UC-9: Withdraw Funds
+      - Actor: Customer
+      - Description: Customer withdraws money from an account
+      - Preconditions: Customer is logged in, account exists, sufficient balance
+      - Postconditions: Account balance decreased, transaction recorded
+
+   UC-10: Transfer Funds
+      - Actor: Customer
+      - Description: Customer transfers money from one account to another
+      - Preconditions: Customer is logged in, both accounts exist, sufficient balance in source account
+      - Postconditions: Source account balance decreased, destination account balance increased, transactions recorded
+
+D. TRANSACTION HISTORY
+   UC-11: View Transaction History
+      - Actor: Customer
+      - Description: Customer views all transactions for a specific account
+      - Preconditions: Customer is logged in, account exists
+      - Postconditions: Transaction history displayed
+
+   UC-12: Filter Transactions
+      - Actor: Customer
+      - Description: Customer filters transactions by date range or transaction type
+      - Preconditions: Customer is logged in, viewing transaction history
+      - Postconditions: Filtered transaction list displayed
+
+   UC-13: Generate Statement
+      - Actor: Customer
+      - Description: Customer generates monthly account statement
+      - Preconditions: Customer is logged in, account exists
+      - Postconditions: Account statement generated (can be printed/downloaded)
+
+E. ADMINISTRATOR OPERATIONS (Optional)
+   UC-14: View All Accounts
+      - Actor: Administrator
+      - Description: Administrator views all customer accounts in the system
+      - Preconditions: Administrator is logged in
+      - Postconditions: All accounts displayed
+
+   UC-15: View All Transactions
+      - Actor: Administrator
+      - Description: Administrator views all transactions across all accounts
+      - Preconditions: Administrator is logged in
+      - Postconditions: All transactions displayed
+
+   UC-16: Manage User Accounts
+      - Actor: Administrator
+      - Description: Administrator can activate/deactivate user accounts
+      - Preconditions: Administrator is logged in
+      - Postconditions: User account status updated
+
+F. LOAN MANAGEMENT (Optional Enhancement)
+   UC-17: Apply for Loan
+      - Actor: Customer
+      - Description: Customer applies for a loan through the system
+      - Preconditions: Customer is logged in
+      - Postconditions: Loan application submitted
+
+   UC-18: Check Loan Eligibility (AI-based)
+      - Actor: Customer
+      - Description: System uses AI to check customer's loan eligibility
+      - Preconditions: Customer is logged in, applying for loan
+      - Postconditions: Eligibility result displayed
+
+   UC-19: Track Loan Payments
+      - Actor: Customer
+      - Description: Customer views loan payment history and remaining balance
+      - Preconditions: Customer is logged in, has active loan
+      - Postconditions: Loan payment information displayed
+
+RELATIONSHIPS:
+--------------
+
+- Customer <<includes>> Login before all banking operations
+- Customer <<extends>> Sign Up (if new customer)
+- Deposit, Withdrawal, Transfer <<includes>> Verify Account Balance
+- Transfer <<includes>> Verify Destination Account
+- Withdrawal, Transfer <<includes>> Check Sufficient Funds
+- View Transaction History <<extends>> Filter Transactions
+- Administrator <<generalizes>> Customer (inherits all customer use cases)
+

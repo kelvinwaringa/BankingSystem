@@ -1,0 +1,259 @@
+CLASS DIAGRAM - BANKING SYSTEM
+================================
+
+DOMAIN CLASSES (BankingSystem.Models):
+----------------------------------------
+
+1. User
+   - Attributes:
+     + UserId: int
+     + Username: string
+     + Email: string
+     + PasswordHash: string
+     + FirstName: string
+     + LastName: string
+     + PhoneNumber: string (nullable)
+     + Address: string (nullable)
+     + DateOfBirth: DateTime? (nullable)
+     + Role: string
+     + IsActive: bool
+     + CreatedDate: DateTime
+     + LastModifiedDate: DateTime
+   - Properties:
+     + FullName: string (computed)
+   - Relationships:
+     + Accounts: List<Account> (one-to-many)
+
+2. AccountType
+   - Attributes:
+     + AccountTypeId: int
+     + TypeName: string
+     + Description: string (nullable)
+     + InterestRate: decimal
+     + MinimumBalance: decimal
+   - Relationships:
+     + Accounts: List<Account> (one-to-many)
+
+3. Account
+   - Attributes:
+     + AccountId: int
+     + UserId: int
+     + AccountTypeId: int
+     + AccountNumber: string
+     + Balance: decimal
+     + IsActive: bool
+     + CreatedDate: DateTime
+     + LastModifiedDate: DateTime
+   - Relationships:
+     + User: User (many-to-one)
+     + AccountType: AccountType (many-to-one)
+     + Transactions: List<Transaction> (one-to-many)
+
+4. TransactionType
+   - Attributes:
+     + TransactionTypeId: int
+     + TypeName: string
+   - Relationships:
+     + Transactions: List<Transaction> (one-to-many)
+
+5. Transaction
+   - Attributes:
+     + TransactionId: int
+     + AccountId: int
+     + TransactionTypeId: int
+     + Amount: decimal
+     + BalanceAfterTransaction: decimal
+     + Description: string (nullable)
+     + RelatedAccountId: int? (nullable)
+     + TransactionDate: DateTime
+   - Relationships:
+     + Account: Account (many-to-one)
+     + TransactionType: TransactionType (many-to-one)
+     + RelatedAccount: Account (many-to-one, for transfers)
+
+6. Loan
+   - Attributes:
+     + LoanId: int
+     + UserId: int
+     + AccountId: int? (nullable)
+     + LoanAmount: decimal
+     + InterestRate: decimal
+     + MonthlyPayment: decimal
+     + RemainingBalance: decimal
+     + LoanStatus: string
+     + ApplicationDate: DateTime
+     + ApprovalDate: DateTime? (nullable)
+     + DueDate: DateTime? (nullable)
+   - Relationships:
+     + User: User (many-to-one)
+     + Account: Account (many-to-one, nullable)
+
+DATA ACCESS LAYER (BankingSystem.DataAccess):
+----------------------------------------------
+
+7. DatabaseConnection
+   - Methods:
+     + GetConnection(): SqlConnection (static)
+     + SetConnectionString(connectionString: string): void (static)
+
+8. UserRepository
+   - Methods:
+     + CreateUser(user: User): int
+     + GetUserByUsername(username: string): User
+     + GetUserById(userId: int): User
+     + UpdateUser(user: User): bool
+
+9. AccountRepository
+   - Methods:
+     + CreateAccount(account: Account): int
+     + GetAccountsByUserId(userId: int): List<Account>
+     + GetAccountByAccountNumber(accountNumber: string): Account
+     + GetAccountById(accountId: int): Account
+     + GetAllAccountTypes(): List<AccountType>
+     + GenerateAccountNumber(): string
+
+10. TransactionRepository
+    - Methods:
+      + ProcessTransaction(transaction: Transaction): int
+      + GetTransactionHistory(accountId: int, startDate?: DateTime, endDate?: DateTime, transactionTypeId?: int): List<Transaction>
+      + GetAllTransactionTypes(): List<TransactionType>
+      + GetTransactionTypeIdByName(typeName: string): int
+
+BUSINESS LOGIC LAYER (BankingSystem.BusinessLogic):
+----------------------------------------------------
+
+11. SecurityService
+    - Methods:
+      + HashPassword(password: string): string (static)
+      + VerifyPassword(password: string, passwordHash: string): bool (static)
+      + IsValidEmail(email: string): bool (static)
+
+12. UserService
+    - Dependencies:
+      - UserRepository
+    - Methods:
+      + RegisterUser(username: string, email: string, password: string, firstName: string, lastName: string, phoneNumber?: string, address?: string, dateOfBirth?: DateTime): int
+      + Login(username: string, password: string): User
+      + GetUserById(userId: int): User
+      + UpdateUserProfile(user: User): bool
+
+13. AccountService
+    - Dependencies:
+      - AccountRepository
+    - Methods:
+      + CreateAccount(userId: int, accountTypeId: int, initialBalance: decimal): Account
+      + GetUserAccounts(userId: int): List<Account>
+      + GetAccountByAccountNumber(accountNumber: string): Account
+      + GetAccountById(accountId: int): Account
+      + GetAllAccountTypes(): List<AccountType>
+
+14. TransactionService
+    - Dependencies:
+      - TransactionRepository
+      - AccountRepository
+    - Methods:
+      + ProcessDeposit(accountId: int, amount: decimal, description?: string): Transaction
+      + ProcessWithdrawal(accountId: int, amount: decimal, description?: string): Transaction
+      + ProcessTransfer(fromAccountId: int, toAccountId: int, amount: decimal, description?: string): Transaction
+      + GetTransactionHistory(accountId: int, startDate?: DateTime, endDate?: DateTime, transactionType?: string): List<Transaction>
+      + GetAllTransactionTypes(): List<TransactionType>
+
+PRESENTATION LAYER (BankingSystem.Presentation):
+-------------------------------------------------
+
+15. LoginForm : Form
+    - Attributes:
+      - _userService: UserService
+      - _currentUser: User
+    - Methods:
+      + btnLogin_Click(sender: object, e: EventArgs): void
+      + btnSignUp_Click(sender: object, e: EventArgs): void
+
+16. SignUpForm : Form
+    - Attributes:
+      - _userService: UserService
+    - Methods:
+      + btnSignUp_Click(sender: object, e: EventArgs): void
+      + btnCancel_Click(sender: object, e: EventArgs): void
+
+17. DashboardForm : Form
+    - Attributes:
+      - _currentUser: User
+      - _userService: UserService
+      - _accountService: AccountService
+      - _transactionService: TransactionService
+    - Methods:
+      + LoadAccounts(): void
+      + GetSelectedAccount(): Account
+      + btnViewTransactions_Click(sender: object, e: EventArgs): void
+      + btnDeposit_Click(sender: object, e: EventArgs): void
+      + btnWithdraw_Click(sender: object, e: EventArgs): void
+      + btnTransfer_Click(sender: object, e: EventArgs): void
+      + btnCreateAccount_Click(sender: object, e: EventArgs): void
+      + btnUpdateProfile_Click(sender: object, e: EventArgs): void
+      + btnLogout_Click(sender: object, e: EventArgs): void
+
+18. TransactionForm : Form
+    - Attributes:
+      - _account: Account
+      - _transactionType: string
+      - _transactionService: TransactionService
+    - Methods:
+      + btnProcess_Click(sender: object, e: EventArgs): void
+      + btnCancel_Click(sender: object, e: EventArgs): void
+
+19. TransferForm : Form
+    - Attributes:
+      - _fromAccount: Account
+      - _transactionService: TransactionService
+      - _accountService: AccountService
+    - Methods:
+      + LoadDestinationAccounts(): void
+      + btnTransfer_Click(sender: object, e: EventArgs): void
+      + btnCancel_Click(sender: object, e: EventArgs): void
+
+20. TransactionHistoryForm : Form
+    - Attributes:
+      - _account: Account
+      - _transactionService: TransactionService
+    - Methods:
+      + LoadTransactions(startDate?: DateTime, endDate?: DateTime): void
+      + btnFilter_Click(sender: object, e: EventArgs): void
+      + btnClose_Click(sender: object, e: EventArgs): void
+
+21. CreateAccountForm : Form
+    - Attributes:
+      - _userId: int
+      - _accountService: AccountService
+    - Methods:
+      + LoadAccountTypes(): void
+      + btnCreate_Click(sender: object, e: EventArgs): void
+      + btnCancel_Click(sender: object, e: EventArgs): void
+
+22. ProfileForm : Form
+    - Attributes:
+      - _user: User
+      - _userService: UserService
+    - Methods:
+      + LoadUserData(): void
+      + btnSave_Click(sender: object, e: EventArgs): void
+      + btnCancel_Click(sender: object, e: EventArgs): void
+
+23. Program
+    - Methods:
+      + Main(): void (static, entry point)
+
+RELATIONSHIPS:
+--------------
+
+- UserRepository uses User
+- AccountRepository uses Account, AccountType
+- TransactionRepository uses Transaction, TransactionType
+- UserService uses UserRepository, SecurityService
+- AccountService uses AccountRepository
+- TransactionService uses TransactionRepository, AccountRepository
+- All Forms use corresponding Services
+- Services depend on Repositories
+- Repositories depend on DatabaseConnection
+- Models are used across all layers
+

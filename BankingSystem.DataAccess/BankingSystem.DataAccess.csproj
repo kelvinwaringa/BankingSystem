@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>BankingSystem.DataAccess</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Configuration" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BankingSystem.Models\BankingSystem.Models.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
+  </ItemGroup>
+
+</Project>
+
